@@ -1,6 +1,7 @@
 package com.justdevthat.service.impl;
 
 import com.justdevthat.service.ConsumerService;
+import com.justdevthat.service.MainService;
 import com.justdevthat.service.ProducerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,10 +15,10 @@ import static com.justdevthat.RabbitQueue.*;
 @Service
 public class ConsumerServiceImpl implements ConsumerService {
   private final static Logger log = LogManager.getLogger(ConsumerService.class);
-  private ProducerService producerService;
+  private final MainService mainService;
 
-  public ConsumerServiceImpl(ProducerService producerService) {
-    this.producerService = producerService;
+  public ConsumerServiceImpl(MainService mainService) {
+    this.mainService = mainService;
   }
 
   @Override
@@ -25,11 +26,7 @@ public class ConsumerServiceImpl implements ConsumerService {
   public void consumeTextMessageUpdates(Update update) {
     log.info("NODE: Text message received.");
 
-    var message = update.getMessage();
-    var sendMessage = new SendMessage();
-    sendMessage.setChatId(message.getChatId());
-    sendMessage.setText("Hi from NODE microservice");
-    producerService.produceAnswer(sendMessage);
+    mainService.processTextMessage(update);
   }
 
   @Override

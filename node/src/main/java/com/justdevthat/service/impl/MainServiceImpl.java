@@ -2,11 +2,15 @@ package com.justdevthat.service.impl;
 
 import com.justdevthat.dao.AppUserDAO;
 import com.justdevthat.dao.RawDataDAO;
+import com.justdevthat.entity.AppDocument;
 import com.justdevthat.entity.AppUser;
 import com.justdevthat.entity.RawData;
 import com.justdevthat.entity.UserState;
+import com.justdevthat.exceptions.UploadFileException;
+import com.justdevthat.service.FileService;
 import com.justdevthat.service.MainService;
 import com.justdevthat.service.ProducerService;
+import com.justdevthat.service.enums.ServiceCommands;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -23,11 +27,13 @@ public class MainServiceImpl implements MainService {
   private final RawDataDAO rawDataDAO;
   private final ProducerService producerService;
   private final AppUserDAO appUserDAO;
+  private final FileService fileService;
 
-  public MainServiceImpl(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO) {
+  public MainServiceImpl(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO, FileService fileService) {
     this.rawDataDAO = rawDataDAO;
     this.producerService = producerService;
     this.appUserDAO = appUserDAO;
+    this.fileService = fileService;
   }
 
   @Override
@@ -38,7 +44,8 @@ public class MainServiceImpl implements MainService {
     var text = update.getMessage().getText();
     var output = "";
 
-    if (CANCEL.equals(text)) {
+    ServiceCommands serviceCommands = fromValue(text);
+    if (CANCEL.equals(serviceCommands)) {
       output = cancelProcess(appUser);
     } else if (BASIC_STATE.equals(userStat)) {
       output = processServiceCommands(appUser, text);
@@ -63,6 +70,19 @@ public class MainServiceImpl implements MainService {
       return;
     }
     //TODO добавить сохранение документа!
+    try {
+      AppDocument doc = fileService.processDoc(update.getMessage());
+      //TODO добавить генерацию ссылки на скачивание
+      var answer = "Документ успешно загружен! "
+              + "Ссылка для скачивания: " + "http://test.ru/get-doc/777";
+      sendAnswer(answer, chatId);
+    } catch (UploadFileException ex) {
+      log.error(ex);
+      String error = "К сожалению, загрузка файла не удалась. Повторите попытку позже.";
+      sendAnswer(error, chatId);
+    }
+
+
     var answer = "Документ успешно загружен! (заглушка) Ссылка для скачивания: http://test.ru/get-doc/777";
     sendAnswer(answer, chatId);
   }
@@ -103,12 +123,13 @@ public class MainServiceImpl implements MainService {
   }
 
   private String processServiceCommands(AppUser appUser, String cmd) {
-    if (REGISTRATION.equals(cmd)) 
+    ServiceCommands serviceCommand = fromValue(cmd);
+    if (REGISTRATION.equals(serviceCommand))
       //TODO сделать регистрацию
       return "Временно недоступно.";
-     else if (HELP.equals(cmd)) 
+     else if (HELP.equals(serviceCommand))
       return help();
-     else if (START.equals(cmd)) 
+     else if (START.equals(serviceCommand))
       return "Приветствую! Чтобы посмотреть список всех команд введите /help";
      else 
       return "Неизвестная команда! Чтобы посмотреть список всех команд введите /help";

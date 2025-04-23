@@ -2,7 +2,7 @@ package com.justdevthat.entity;
 
 import javax.persistence.*;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.justdevthat.entity.enums.UserState;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@EqualsAndHashCode()
+@EqualsAndHashCode(exclude = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

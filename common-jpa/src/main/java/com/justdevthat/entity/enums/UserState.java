@@ -1,4 +1,4 @@
-package com.justdevthat.entity;
+package com.justdevthat.entity.enums;
 
 public enum UserState {
   BASIC_STATE,

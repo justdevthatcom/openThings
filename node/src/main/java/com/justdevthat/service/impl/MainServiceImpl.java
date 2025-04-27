@@ -11,6 +11,7 @@ import com.justdevthat.exceptions.UploadFileException;
 import com.justdevthat.service.FileService;
 import com.justdevthat.service.MainService;
 import com.justdevthat.service.ProducerService;
+import com.justdevthat.service.enums.LinkType;
 import com.justdevthat.service.enums.ServiceCommands;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -72,19 +73,15 @@ public class MainServiceImpl implements MainService {
     }
     try {
       AppDocument doc = fileService.processDoc(update.getMessage());
-      //TODO добавить генерацию ссылки на скачивание
+      var link = fileService.generateLink(doc.getId(), LinkType.GET_DOC);
       var answer = "Документ успешно загружен! "
-              + "Ссылка для скачивания: " + "http://test.ru/get-doc/777";
+              + "Ссылка для скачивания: " + link;
       sendAnswer(answer, chatId);
     } catch (UploadFileException ex) {
       log.error(ex);
       String error = "К сожалению, загрузка файла не удалась. Повторите попытку позже.";
       sendAnswer(error, chatId);
     }
-
-
-    var answer = "Документ успешно загружен! (заглушка) Ссылка для скачивания: http://test.ru/get-doc/777";
-    sendAnswer(answer, chatId);
   }
 
   private boolean isNotAllowToSendContent(Long chatId, AppUser appUser) {
@@ -111,8 +108,8 @@ public class MainServiceImpl implements MainService {
     }
     try {
       AppPhoto appPhoto = fileService.processPhoto(update.getMessage());
-      //TODO добавить генерацию ссылки для скачивания фото
-      var answer = "Фото успешно загружено! (заглушка) Ссылка для скачивания: http://test.ru/get-photo/777";
+      var link = fileService.generateLink(appPhoto.getId(), LinkType.GET_PHOTO);
+      var answer = "Фото успешно загружено! (заглушка) Ссылка для скачивания: " + link;
       sendAnswer(answer, chatId);
     } catch (UploadFileException ex) {
       log.error(ex);

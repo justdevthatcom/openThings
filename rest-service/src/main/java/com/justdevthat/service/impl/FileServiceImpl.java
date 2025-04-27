@@ -6,6 +6,7 @@ import com.justdevthat.entity.AppDocument;
 import com.justdevthat.entity.AppPhoto;
 import com.justdevthat.entity.BinaryContent;
 import com.justdevthat.service.FileService;
+import com.justdevthat.utils.CryptoTool;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.aspectj.util.FileUtil;
@@ -21,23 +22,29 @@ import java.util.UUID;
 public class FileServiceImpl implements FileService {
   private final AppDocumentDAO appDocumentDAO;
   private final AppPhotoDAO appPhotoDAO;
+  private final CryptoTool cryptoTool;
 
-  public FileServiceImpl(AppDocumentDAO appDocumentDAO, AppPhotoDAO appPhotoDAO) {
+  public FileServiceImpl(AppDocumentDAO appDocumentDAO, AppPhotoDAO appPhotoDAO, CryptoTool cryptoTool) {
     this.appDocumentDAO = appDocumentDAO;
     this.appPhotoDAO = appPhotoDAO;
+    this.cryptoTool = cryptoTool;
   }
 
   @Override
-  public AppDocument getDocument(String docId) {
-    //TODO добавить дешифрование хеш-строки
-    var id = Long.parseLong(docId);
+  public AppDocument getDocument(String hashId) {
+    // дешифруем сперва хеш пришедшего от rest-запроса Id
+    Long id = cryptoTool.idOf(hashId);
+    if (id == null)
+      return null;
     return appDocumentDAO.findById(id).orElse(null);
   }
 
   @Override
-  public AppPhoto getPhoto(String photoId) {
-    //TODO добавить дешифрование хеш-строки
-    var id = Long.parseLong(photoId);
+  public AppPhoto getPhoto(String hashId) {
+    // дешифруем сперва хеш пришедшего от rest-запроса Id
+    Long id = cryptoTool.idOf(hashId);
+    if (id == null)
+      return null;
     return appPhotoDAO.findById(id).orElse(null);
   }
 

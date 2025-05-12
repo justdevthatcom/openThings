@@ -12,14 +12,14 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static com.justdevthat.RabbitQueue.*;
 
 @Component
-public class UpdateController {
-  private final static Logger log = LogManager.getLogger(UpdateController.class);
+public class UpdateProcessor {
+  private final static Logger log = LogManager.getLogger(UpdateProcessor.class);
   private TelegramBot tgBot;
   private final MessageUtils messageUtils;
   @Autowired
   private UpdateProducer updateProducer;
 
-  public UpdateController(MessageUtils messageUtils) {
+  public UpdateProcessor(MessageUtils messageUtils) {
     this.messageUtils = messageUtils;
   }
 

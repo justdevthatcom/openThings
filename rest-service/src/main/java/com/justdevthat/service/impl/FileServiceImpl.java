@@ -4,18 +4,10 @@ import com.justdevthat.dao.AppDocumentDAO;
 import com.justdevthat.dao.AppPhotoDAO;
 import com.justdevthat.entity.AppDocument;
 import com.justdevthat.entity.AppPhoto;
-import com.justdevthat.entity.BinaryContent;
 import com.justdevthat.service.FileService;
 import com.justdevthat.utils.CryptoTool;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.io.FileUtils;
-import org.aspectj.util.FileUtil;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
 
 @Log4j2
 @Service
@@ -48,18 +40,18 @@ public class FileServiceImpl implements FileService {
     return appPhotoDAO.findById(id).orElse(null);
   }
 
-  @Override
-  public FileSystemResource getFileSystemResource(BinaryContent binaryContent) {
-    try {
-      //TODO уточнить достаточно ли randomUUID для генерации имени временного файла
-      UUID randomUUID = UUID.randomUUID();
-      File temp = File.createTempFile("tempFile_" + randomUUID, "bin");
-      temp.deleteOnExit(); // удаляет файл из постоянной памяти при выходе из приложения
-      FileUtils.writeByteArrayToFile(temp, binaryContent.getFileAsArrayOfBytes());
-      return new FileSystemResource(temp);
-    } catch (IOException e) {
-      log.error(e);
-      return null;
-    }
-  }
+//  @Override
+//  public FileSystemResource getFileSystemResource(BinaryContent binaryContent) {
+//    try {
+//      //TODO уточнить достаточно ли randomUUID для генерации имени временного файла
+//      UUID randomUUID = UUID.randomUUID();
+//      File temp = File.createTempFile("tempFile_" + randomUUID, "bin");
+//      temp.deleteOnExit(); // удаляет файл из постоянной памяти при выходе из приложения
+//      FileUtils.writeByteArrayToFile(temp, binaryContent.getFileAsArrayOfBytes());
+//      return new FileSystemResource(temp);
+//    } catch (IOException e) {
+//      log.error(e);
+//      return null;
+//    }
+//  }
 }

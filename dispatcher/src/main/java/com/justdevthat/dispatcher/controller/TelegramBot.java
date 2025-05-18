@@ -1,7 +1,5 @@
 package com.justdevthat.dispatcher.controller;
 
-//import lombok.extern.log4j.Log4j;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,8 +16,8 @@ import javax.annotation.PostConstruct;
 
 @Component
 //@Log4j //- работает только с import lombok.extern.log4j.Log4j; то есть с версией Log4j 1.x
-//public class TelegramBot extends TelegramLongPollingBot { // без статического IP
-public class TelegramBot extends TelegramWebhookBot {
+public class TelegramBot extends TelegramLongPollingBot { // без статического IP
+//public class TelegramBot extends TelegramWebhookBot { // нужен статический IP
   private final static Logger log = LogManager.getLogger(TelegramBot.class);
   @Value("${bot.name}")
   private String botName;
@@ -38,12 +36,6 @@ public class TelegramBot extends TelegramWebhookBot {
   @PostConstruct
   public void init() {
     updateProcessor.registerBot(this);
-    try {
-      var setWebHook = SetWebhook.builder().url(botUri).build();
-      this.setWebhook(setWebHook);
-    } catch (TelegramApiException e) {
-      log.error(e);
-    }
   }
 
 
@@ -58,8 +50,8 @@ public class TelegramBot extends TelegramWebhookBot {
   }
 
   // Для TelegramLongPollingBot
-//  @Override
-//  public void onUpdateReceived(Update update) {
+  @Override
+  public void onUpdateReceived(Update update) {
 //    // -- просто для обратной связи
 //    var origMessage = update.getMessage();
 //    if (origMessage != null) {
@@ -67,14 +59,14 @@ public class TelegramBot extends TelegramWebhookBot {
 //      System.out.println("from sout: " + origMessage.getText());
 //    }
 //    // -- конец
+
+    updateProcessor.processUpdate(update);
 //
-//    updateProcessor.processUpdate(update);
-//
-////    var response = new SendMessage();
-////    response.setChatId(origMessage.getChatId());
-////    response.setText(String.format("Ответ ботика: Точно %s ???", origMessage.getText()));
-////    sendAnswerMessage(response);
-//  }
+//    var response = new SendMessage();
+//    response.setChatId(origMessage.getChatId());
+//    response.setText(String.format("Ответ ботика: Точно %s ???", origMessage.getText()));
+//    sendAnswerMessage(response);
+  }
 
   public void sendAnswerMessage(SendMessage message) {
     if (message != null) {
@@ -86,13 +78,14 @@ public class TelegramBot extends TelegramWebhookBot {
     }
   }
 
-  @Override
-  public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-    return null; // метод не понадобится
-  }
-
-  @Override
-  public String getBotPath() {
-    return "/update"; // <bot.uri> + "/callback" + "/update". Например, "https:/openThings.ru/callback/update"
-  }
+//  // Для TelegramWebhookBot
+//  @Override
+//  public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
+//    return null; // метод не понадобится
+//  }
+//
+//  @Override
+//  public String getBotPath() {
+//    return "/update"; // <bot.uri> + "/callback" + "/update". Например, "https:/openThings.ru/callback/update"
+//  }
 }
